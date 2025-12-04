@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task & Earnings Tracker</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: linear-gradient(145deg, #1a1a1a, #151515);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    h1 {
+      text-align: center;
+      padding: 30px 20px 20px;
+      font-size: 28px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #7fff00, #5ac400);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      padding: 25px 20px 15px;
+    }
+    .logo-icon {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-icon img {
+      width: 50px;
+      height: 50px;
+      filter: drop-shadow(0 4px 15px rgba(127, 255, 0, 0.3));
+    }
+    .logo-text {
+      font-size: 32px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #7fff00, #5ac400);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .tabs {
+      display: flex;
+      background: #0f0f0f;
+      border-bottom: 2px solid #222;
+    }
+    .tab {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+      border: none;
+      background: transparent;
+      color: #666;
+      font-size: 16px;
+    }
+    .tab.active {
+      color: #7fff00;
+      background: #1a1a1a;
+      border-bottom: 3px solid #7fff00;
+    }
+    .tab:hover:not(.active) {
+      background: #151515;
+      color: #999;
+    }
+    .content {
+      padding: 25px;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .summary-card {
+      background: #0f0f0f;
+      padding: 20px;
+      border-radius: 15px;
+      border: 1px solid #2a2a2a;
+      text-align: center;
+    }
+    .summary-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+    .summary-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #7fff00;
+    }
+    .task-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    .task-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      border-radius: 15px;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      text-align: center;
+    }
+    .task-box:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+    .task-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .task-label {
+      font-weight: 500;
+      font-size: 15px;
+    }
+    .task-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    .task-name {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.85;
+    }
+    .task-rate {
+      font-size: 11px;
+      opacity: 0.7;
+      font-weight: 400;
+    }
+    input {
+      width: 100%;
+      max-width: 100px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid #333;
+      background: #0a0a0a;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      transition: border-color 0.3s;
+    }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      justify-content: center;
+    }
+    .counter-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(145deg, #1f1f1f, #151515);
+      color: #7fff00;
+      font-size: 26px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    .counter-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      padding: 2px;
+      background: linear-gradient(145deg, rgba(127, 255, 0, 0.2), rgba(127, 255, 0, 0));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .counter-btn:hover {
+      background: linear-gradient(145deg, #252525, #1a1a1a);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(127, 255, 0, 0.2),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+    .counter-btn:hover::before {
+      opacity: 1;
+    }
+    .counter-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3),
+                  inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    input:focus {
+      outline: none;
+      border-color: #7fff00;
+    }
+    #retrieve { background: linear-gradient(135deg, #b30000, #8a0000); }
+    #move { background: linear-gradient(135deg, #0a7e00, #086000); }
+    #swap { background: linear-gradient(135deg, #0055c4, #003d8f); }
+    #deploy { background: linear-gradient(135deg, #cc6a00, #a05000); }
+    .btn {
+      width: 100%;
+      padding: 16px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #7fff00, #5ac400);
+      color: #000;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      box-shadow: 0 4px 15px rgba(127, 255, 0, 0.3),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(127, 255, 0, 0.4),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+    .btn:hover::before {
+      opacity: 1;
+    }
+    .btn:active {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(127, 255, 0, 0.3),
+                  inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    .weekly-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .day-card {
+      background: #0f0f0f;
+      padding: 15px 20px;
+      border-radius: 10px;
+      border-left: 4px solid #7fff00;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .day-name {
+      font-weight: 500;
+      color: #7fff00;
+    }
+    .day-tasks {
+      color: #888;
+      font-size: 14px;
+    }
+    .day-earnings {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-style: italic;
+    }
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    .breakdown-item {
+      padding: 20px;
+      border-radius: 15px;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .breakdown-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+    .breakdown-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .breakdown-label {
+      font-size: 13px;
+      opacity: 0.85;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 500;
+    }
+    .breakdown-value {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .breakdown-subtext {
+      font-size: 11px;
+      opacity: 0.7;
+      margin-top: 6px;
+      font-weight: 400;
+    }
+    .history-sections {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .history-card {
+      background: #0f0f0f;
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #7fff00;
+      margin-bottom: 15px;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .history-title {
+      font-weight: 600;
+      color: #7fff00;
+      font-size: 16px;
+    }
+    .history-earnings {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .history-details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #2a2a2a;
+    }
+    .history-detail {
+      font-size: 13px;
+      color: #888;
+    }
+    .history-detail span {
+      color: #fff;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <div class="logo-icon">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Ccircle cx='256' cy='256' r='240' fill='none' stroke='%2300ff00' stroke-width='32'/%3E%3Ccircle cx='256' cy='256' r='24' fill='%2300ff00'/%3E%3Cpath d='M 256 50 L 200 130 L 256 150 L 312 130 Z' fill='%2300ff00'/%3E%3Cpath d='M 380 130 L 320 240 L 340 280 L 450 260 Z' fill='%2300ff00'/%3E%3Cpath d='M 420 330 L 340 300 L 310 360 L 340 460 Z' fill='%2300ff00'/%3E%3Cpath d='M 256 462 L 210 360 L 170 300 L 256 300 Z' fill='%2300ff00'/%3E%3Cpath d='M 132 330 L 170 300 L 192 240 L 90 220 Z' fill='%2300ff00'/%3E%3Cpath d='M 80 200 L 170 150 L 192 120 L 130 60 Z' fill='%2300ff00'/%3E%3C/svg%3E" alt="Lime Logo">
+      </div>
+      <div class="logo-text">Lime Tracker</div>
+    </div>
+    
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('daily')">Daily</button>
+      <button class="tab" onclick="switchTab('weekly')">Weekly</button>
+      <button class="tab" onclick="switchTab('history')">History</button>
+    </div>
+
+    <div class="content">
+      <div id="dailyTab" class="tab-content active">
+        <div class="summary">
+          <div class="summary-card">
+            <div class="summary-label">Total Tasks</div>
+            <div class="summary-value" id="dailyTotalTasks">0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Total Earnings</div>
+            <div class="summary-value">$<span id="dailyTotalEarnings">0</span></div>
+          </div>
+        </div>
+
+        <div class="task-grid">
+          <div class="task-box" id="retrieve">
+            <div class="task-info">
+              <div class="task-name">Retrieve</div>
+              <div class="task-rate">$6 per task</div>
+            </div>
+            <div class="input-wrapper">
+              <button class="counter-btn" onclick="decrementValue('retrieveCount')">−</button>
+              <input type="number" id="retrieveCount" min="0" value="0" readonly />
+              <button class="counter-btn" onclick="incrementValue('retrieveCount')">+</button>
+            </div>
+          </div>
+          <div class="task-box" id="move">
+            <div class="task-info">
+              <div class="task-name">Move</div>
+              <div class="task-rate">$5 per task</div>
+            </div>
+            <div class="input-wrapper">
+              <button class="counter-btn" onclick="decrementValue('moveCount')">−</button>
+              <input type="number" id="moveCount" min="0" value="0" readonly />
+              <button class="counter-btn" onclick="incrementValue('moveCount')">+</button>
+            </div>
+          </div>
+          <div class="task-box" id="swap">
+            <div class="task-info">
+              <div class="task-name">Swap</div>
+              <div class="task-rate">$4 per task</div>
+            </div>
+            <div class="input-wrapper">
+              <button class="counter-btn" onclick="decrementValue('swapCount')">−</button>
+              <input type="number" id="swapCount" min="0" value="0" readonly />
+              <button class="counter-btn" onclick="incrementValue('swapCount')">+</button>
+            </div>
+          </div>
+          <div class="task-box" id="deploy">
+            <div class="task-info">
+              <div class="task-name">Deploy</div>
+              <div class="task-rate">$3 per task</div>
+            </div>
+            <div class="input-wrapper">
+              <button class="counter-btn" onclick="decrementValue('deployCount')">−</button>
+              <input type="number" id="deployCount" min="0" value="0" readonly />
+              <button class="counter-btn" onclick="incrementValue('deployCount')">+</button>
+            </div>
+          </div>
+        </div>
+        
+        <button class="btn" onclick="saveDaily()">Save Today's Tasks</button>
+      </div>
+
+      <div id="weeklyTab" class="tab-content">
+        <div class="summary">
+          <div class="summary-card">
+            <div class="summary-label">Weekly Tasks</div>
+            <div class="summary-value" id="weeklyTotalTasks">0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Weekly Earnings</div>
+            <div class="summary-value">$<span id="weeklyTotalEarnings">0</span></div>
+          </div>
+        </div>
+
+        <div class="task-breakdown">
+          <h3 style="color: #7fff00; margin-bottom: 20px; font-size: 20px; font-weight: 600;">Task Breakdown</h3>
+          <div class="breakdown-grid">
+            <div class="breakdown-item" style="background: linear-gradient(135deg, #b30000, #8a0000);">
+              <div class="breakdown-label">Retrieve</div>
+              <div class="breakdown-value" id="weeklyRetrieve">0</div>
+              <div class="breakdown-subtext">$6 per task</div>
+            </div>
+            <div class="breakdown-item" style="background: linear-gradient(135deg, #0a7e00, #086000);">
+              <div class="breakdown-label">Move</div>
+              <div class="breakdown-value" id="weeklyMove">0</div>
+              <div class="breakdown-subtext">$5 per task</div>
+            </div>
+            <div class="breakdown-item" style="background: linear-gradient(135deg, #0055c4, #003d8f);">
+              <div class="breakdown-label">Swap</div>
+              <div class="breakdown-value" id="weeklySwap">0</div>
+              <div class="breakdown-subtext">$4 per task</div>
+            </div>
+            <div class="breakdown-item" style="background: linear-gradient(135deg, #cc6a00, #a05000);">
+              <div class="breakdown-label">Deploy</div>
+              <div class="breakdown-value" id="weeklyDeploy">0</div>
+              <div class="breakdown-subtext">$3 per task</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="color: #7fff00; margin: 25px 0 15px; font-size: 18px;">Daily Breakdown</h3>
+        <div class="weekly-list" id="weeklyList">
+          <div class="no-data">No data for this week yet</div>
+        </div>
+      </div>
+
+      <div id="historyTab" class="tab-content">
+        <div class="history-sections">
+          <div class="history-section">
+            <h3 style="color: #7fff00; margin-bottom: 15px; font-size: 18px;">Previous Weeks</h3>
+            <div id="weekHistory"></div>
+          </div>
+          
+          <div class="history-section" style="margin-top: 30px;">
+            <h3 style="color: #7fff00; margin-bottom: 15px; font-size: 18px;">All Days</h3>
+            <div id="dayHistory"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    function incrementValue(id) {
+      const input = document.getElementById(id);
+      input.value = parseInt(input.value || 0) + 1;
+      calculate();
+    }
+    
+    function decrementValue(id) {
+      const input = document.getElementById(id);
+      const currentValue = parseInt(input.value || 0);
+      if (currentValue > 0) {
+        input.value = currentValue - 1;
+        calculate();
+      }
+    }
+    
+    function getWeekKey() {
+      const now = new Date();
+      const day = now.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() + diff);
+      monday.setHours(0, 0, 0, 0);
+      return monday.toISOString().split('T')[0];
+    }
+
+    function getTodayKey() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      
+      if (tab === 'daily') {
+        document.querySelectorAll('.tab')[0].classList.add('active');
+        document.getElementById('dailyTab').classList.add('active');
+        loadDaily();
+      } else if (tab === 'weekly') {
+        document.querySelectorAll('.tab')[1].classList.add('active');
+        document.getElementById('weeklyTab').classList.add('active');
+        loadWeekly();
+      } else if (tab === 'history') {
+        document.querySelectorAll('.tab')[2].classList.add('active');
+        document.getElementById('historyTab').classList.add('active');
+        loadHistory();
+      }
+    }
+
+    function calculate() {
+      const retrieve = parseInt(document.getElementById('retrieveCount').value) || 0;
+      const move = parseInt(document.getElementById('moveCount').value) || 0;
+      const swap = parseInt(document.getElementById('swapCount').value) || 0;
+      const deploy = parseInt(document.getElementById('deployCount').value) || 0;
+      
+      const totalTasks = retrieve + move + swap + deploy;
+      const totalEarnings = retrieve * 6 + move * 5 + swap * 4 + deploy * 3;
+      
+      document.getElementById('dailyTotalTasks').innerText = totalTasks;
+      document.getElementById('dailyTotalEarnings').innerText = totalEarnings;
+      
+      return { totalTasks, totalEarnings, retrieve, move, swap, deploy };
+    }
+
+    function saveDaily() {
+      const data = calculate();
+      const todayKey = getTodayKey();
+      const weekKey = getWeekKey();
+      
+      const weekData = JSON.parse(localStorage.getItem(weekKey) || '{}');
+      weekData[todayKey] = {
+        ...data,
+        dayName: days[new Date().getDay()],
+        date: todayKey
+      };
+      
+      localStorage.setItem(weekKey, JSON.stringify(weekData));
+      
+      alert('Today\'s tasks saved successfully!');
+      loadWeekly();
+    }
+
+    function loadDaily() {
+      const todayKey = getTodayKey();
+      const weekKey = getWeekKey();
+      const weekData = JSON.parse(localStorage.getItem(weekKey) || '{}');
+      const todayData = weekData[todayKey];
+      
+      if (todayData) {
+        document.getElementById('retrieveCount').value = todayData.retrieve || 0;
+        document.getElementById('moveCount').value = todayData.move || 0;
+        document.getElementById('swapCount').value = todayData.swap || 0;
+        document.getElementById('deployCount').value = todayData.deploy || 0;
+      }
+      
+      calculate();
+    }
+
+    function loadWeekly() {
+      const weekKey = getWeekKey();
+      const weekData = JSON.parse(localStorage.getItem(weekKey) || '{}');
+      const weeklyList = document.getElementById('weeklyList');
+      
+      let totalTasks = 0;
+      let totalEarnings = 0;
+      let totalRetrieve = 0;
+      let totalMove = 0;
+      let totalSwap = 0;
+      let totalDeploy = 0;
+      
+      const sortedDays = Object.values(weekData).sort((a, b) => {
+        return new Date(a.date) - new Date(b.date);
+      });
+      
+      if (sortedDays.length === 0) {
+        weeklyList.innerHTML = '<div class="no-data">No data for this week yet</div>';
+      } else {
+        sortedDays.forEach(day => {
+          totalTasks += day.totalTasks;
+          totalEarnings += day.totalEarnings;
+          totalRetrieve += day.retrieve || 0;
+          totalMove += day.move || 0;
+          totalSwap += day.swap || 0;
+          totalDeploy += day.deploy || 0;
+        });
+        
+        weeklyList.innerHTML = sortedDays.map(day => {
+          return `
+            <div class="day-card">
+              <div>
+                <div class="day-name">${day.dayName}</div>
+                <div class="day-tasks">${day.totalTasks} tasks</div>
+              </div>
+              <div class="day-earnings">${day.totalEarnings}</div>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      document.getElementById('weeklyTotalTasks').innerText = totalTasks;
+      document.getElementById('weeklyTotalEarnings').innerText = totalEarnings;
+      document.getElementById('weeklyRetrieve').innerText = totalRetrieve;
+      document.getElementById('weeklyMove').innerText = totalMove;
+      document.getElementById('weeklySwap').innerText = totalSwap;
+      document.getElementById('weeklyDeploy').innerText = totalDeploy;
+    }
+
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+      input.addEventListener('input', calculate);
+      input.addEventListener('focus', function() {
+        this.select();
+      });
+    });
+
+    function loadHistory() {
+      const currentWeekKey = getWeekKey();
+      const allKeys = Object.keys(localStorage).filter(key => key.match(/^\d{4}-\d{2}-\d{2}$/));
+      
+      const weeks = {};
+      const allDays = [];
+      
+      allKeys.forEach(weekKey => {
+        const weekData = JSON.parse(localStorage.getItem(weekKey));
+        Object.values(weekData).forEach(day => {
+          allDays.push(day);
+        });
+        
+        if (weekKey !== currentWeekKey) {
+          weeks[weekKey] = weekData;
+        }
+      });
+      
+      // Display previous weeks
+      const weekHistory = document.getElementById('weekHistory');
+      const sortedWeeks = Object.keys(weeks).sort((a, b) => new Date(b) - new Date(a));
+      
+      if (sortedWeeks.length === 0) {
+        weekHistory.innerHTML = '<div class="no-data">No previous weeks recorded</div>';
+      } else {
+        weekHistory.innerHTML = sortedWeeks.map(weekKey => {
+          const weekData = weeks[weekKey];
+          let totalTasks = 0;
+          let totalEarnings = 0;
+          let totalRetrieve = 0;
+          let totalMove = 0;
+          let totalSwap = 0;
+          let totalDeploy = 0;
+          
+          Object.values(weekData).forEach(day => {
+            totalTasks += day.totalTasks;
+            totalEarnings += day.totalEarnings;
+            totalRetrieve += day.retrieve || 0;
+            totalMove += day.move || 0;
+            totalSwap += day.swap || 0;
+            totalDeploy += day.deploy || 0;
+          });
+          
+          const weekStart = new Date(weekKey);
+          const weekEnd = new Date(weekKey);
+          weekEnd.setDate(weekEnd.getDate() + 6);
+          
+          return `
+            <div class="history-card">
+              <div class="history-header">
+                <div class="history-title">Week of ${weekStart.toLocaleDateString()} - ${weekEnd.toLocaleDateString()}</div>
+                <div class="history-earnings">${totalEarnings}</div>
+              </div>
+              <div style="color: #888; font-size: 14px; margin-top: 5px;">${totalTasks} tasks completed</div>
+              <div class="history-details">
+                <div class="history-detail">Retrieve: <span>${totalRetrieve}</span></div>
+                <div class="history-detail">Move: <span>${totalMove}</span></div>
+                <div class="history-detail">Swap: <span>${totalSwap}</span></div>
+                <div class="history-detail">Deploy: <span>${totalDeploy}</span></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      // Display all days
+      const dayHistory = document.getElementById('dayHistory');
+      const sortedDays = allDays.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      if (sortedDays.length === 0) {
+        dayHistory.innerHTML = '<div class="no-data">No days recorded yet</div>';
+      } else {
+        dayHistory.innerHTML = sortedDays.map(day => {
+          const date = new Date(day.date);
+          return `
+            <div class="history-card">
+              <div class="history-header">
+                <div class="history-title">${day.dayName}, ${date.toLocaleDateString()}</div>
+                <div class="history-earnings">${day.totalEarnings}</div>
+              </div>
+              <div style="color: #888; font-size: 14px; margin-top: 5px;">${day.totalTasks} tasks completed</div>
+              <div class="history-details">
+                <div class="history-detail">Retrieve: <span>${day.retrieve || 0}</span></div>
+                <div class="history-detail">Move: <span>${day.move || 0}</span></div>
+                <div class="history-detail">Swap: <span>${day.swap || 0}</span></div>
+                <div class="history-detail">Deploy: <span>${day.deploy || 0}</span></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    loadDaily();
+  </script>
+</body>
+</html>
